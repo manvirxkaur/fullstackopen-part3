@@ -3,7 +3,7 @@ const morgan = require('morgan')
 const app = express()
 const bodyParser = require('body-parser')
 const cors = require('cors')
-
+app.use(express.static('frontend-src/build'))
 app.use(cors())
 app.use(bodyParser.json())
 
