@@ -1,0 +1,7 @@
+POST https://evening-dusk-27571.herokuapp.com/api/persons
+Content-Type: application/json
+
+{
+  "name": "John Test",
+  "number": "123 456 789"
+}
