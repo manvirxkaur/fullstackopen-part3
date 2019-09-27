@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const app = express()
@@ -6,6 +7,26 @@ const cors = require('cors')
 app.use(express.static('frontend-src/build'))
 app.use(cors())
 app.use(bodyParser.json())
+
+const mongoose = require('mongoose')
+
+const url = process.env.MONGODB_URI
+
+mongoose.connect(url, {
+    useNewUrlParser: true
+  })
+  .then(result => {
+    console.log('connected to MongoDB')
+  }).catch((error) => {
+    console.log('error connecting to MongoDB:', error.message)
+  })
+
+const personSchema = new mongoose.Schema({
+  name: String,
+  number: String,
+})
+
+const Person = mongoose.model('Person', personSchema)
 
 morgan.token('body', function(req, res, param) {
   if (req.method !== 'POST') { return ' ' }
@@ -87,7 +108,9 @@ app.get(`/info`, (req, res) => {
 })
 
 app.get(`${api}/persons`, (req, res) => {
-  res.json(persons)
+  Person.find({}).then(persons => {
+    res.json(persons)
+  })
 })
 
 app.get(`${api}/persons/:id`, (request, response) => {
