@@ -4,29 +4,10 @@ const morgan = require('morgan')
 const app = express()
 const bodyParser = require('body-parser')
 const cors = require('cors')
+const Person = require('./models/person')
 app.use(express.static('frontend-src/build'))
 app.use(cors())
 app.use(bodyParser.json())
-
-const mongoose = require('mongoose')
-
-const url = process.env.MONGODB_URI
-
-mongoose.connect(url, {
-    useNewUrlParser: true
-  })
-  .then(result => {
-    console.log('connected to MongoDB')
-  }).catch((error) => {
-    console.log('error connecting to MongoDB:', error.message)
-  })
-
-const personSchema = new mongoose.Schema({
-  name: String,
-  number: String,
-})
-
-const Person = mongoose.model('Person', personSchema)
 
 morgan.token('body', function(req, res, param) {
   if (req.method !== 'POST') { return ' ' }
@@ -36,33 +17,6 @@ morgan.token('body', function(req, res, param) {
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 const api = '/api'
-
-let persons = [{
-    "name": "Arto Hellas",
-    "number": "040-123456",
-    "id": 1
-  },
-  {
-    "name": "Ada Lovelace",
-    "number": "39-44-5323523",
-    "id": 2
-  },
-  {
-    "name": "Dan Abramov",
-    "number": "12-43-234345",
-    "id": 3
-  },
-  {
-    "name": "Mary Poppendieck",
-    "number": "39-23-6423122",
-    "id": 4
-  }
-]
-
-const generateId = () => {
-  const id = parseInt(Math.random() * 100000000, 10)
-  return id
-}
 
 app.post(`${api}/persons`, (request, response) => {
   const body = request.body
@@ -79,49 +33,33 @@ app.post(`${api}/persons`, (request, response) => {
     })
   }
 
-  if (persons.some(person => person.name.toLowerCase() === body.name.toLowerCase())) {
-    return response.status(400).json({
-      error: 'name must be unique'
-    })
-  }
-
-  const person = {
+  const person = new Person({
     name: body.name,
     number: body.number,
-    id: generateId(),
-  }
+  })
 
-  persons = persons.concat(person)
-
-  response.json(person)
+  person.save().then(savedPerson => response.json(savedPerson.toJSON()))
 })
 
-app.get(`/`, (req, res) => {
-  res.send('<h1>Hello World!</h1>')
-})
+app.get(`/`, (req, res) => res.send('<h1>Hello World!</h1>'))
 
 app.get(`/info`, (req, res) => {
-  res.send(`
-    <p>Phonebook has info for ${persons.length} ${persons.length === 1 ? 'person' : 'people'}</p>
-    <p>${new Date()}</p>
-  `)
+  Person.find({}).then(persons =>
+    res.send(`
+      <p>Phonebook has info for ${persons.length} ${persons.length === 1 ? 'person' : 'people'}</p>
+      <p>${new Date()}</p>
+    `)
+  )
 })
 
 app.get(`${api}/persons`, (req, res) => {
-  Person.find({}).then(persons => {
-    res.json(persons)
-  })
+  Person.find({}).then(persons => res.json(persons))
 })
 
 app.get(`${api}/persons/:id`, (request, response) => {
-  const id = Number(request.params.id)
-  const person = persons.find(person => person.id === id)
-
-  if (person) {
-    response.json(person)
-  } else {
-    response.status(404).end()
-  }
+  Person.findById(request.params.id)
+    .then(person => response.json(person.toJSON())
+)
 })
 
 app.delete(`${api}/persons/:id`, (request, response) => {
