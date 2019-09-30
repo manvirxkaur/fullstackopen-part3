@@ -68,6 +68,25 @@ app.get(`${api}/persons/:id`, (request, response, next) => {
     .catch(error => next(error))
 })
 
+app.put(`${api}/persons/:id`, (request, response, next) => {
+  const body = request.body
+
+  const person = {
+    name: body.name,
+    number: body.number,
+  }
+
+  console.log(person)
+
+  Person.findByIdAndUpdate(request.params.id, person, {
+      new: true
+    })
+    .then(updatedPerson => {
+      response.json(updatedPerson.toJSON())
+    })
+    .catch(error => next(error))
+})
+
 app.delete(`${api}/persons/:id`, (request, response, next) => {
   Person.findByIdAndRemove(request.params.id)
     .then(() => response.status(204).end())
