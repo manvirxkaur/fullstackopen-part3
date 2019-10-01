@@ -9,9 +9,9 @@ app.use(express.static('frontend-src/build'))
 app.use(cors())
 app.use(bodyParser.json())
 
-morgan.token('body', function(req, res, param) {
+morgan.token('body', function(req) {
   if (req.method !== 'POST') { return ' ' }
-	return JSON.stringify(req.body)
+  return JSON.stringify(req.body)
 })
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
@@ -39,14 +39,14 @@ app.post(`${api}/persons`, (request, response, next) => {
   })
 
   person
-  .save()
-  .then(savedPerson => response.json(savedPerson.toJSON()))
-  .catch(error => next(error))
+    .save()
+    .then(savedPerson => response.json(savedPerson.toJSON()))
+    .catch(error => next(error))
 })
 
-app.get(`/`, (req, res) => res.send('<h1>Hello World!</h1>'))
+app.get('/', (req, res) => res.send('<h1>Hello World!</h1>'))
 
-app.get(`/info`, (req, res) => {
+app.get('/info', (req, res) => {
   Person.find({}).then(persons =>
     res.send(`
       <p>Phonebook has info for ${persons.length} ${persons.length === 1 ? 'person' : 'people'}</p>
@@ -62,12 +62,12 @@ app.get(`${api}/persons`, (req, res) => {
 app.get(`${api}/persons/:id`, (request, response, next) => {
   Person.findById(request.params.id)
     .then(person => {
-        if (person) {
-          response.json(person.toJSON())
-        } else {
-          response.status(404).end()
-        }
-      })
+      if (person) {
+        response.json(person.toJSON())
+      } else {
+        response.status(404).end()
+      }
+    })
     .catch(error => next(error))
 })
 
@@ -82,8 +82,8 @@ app.put(`${api}/persons/:id`, (request, response, next) => {
   console.log(person)
 
   Person.findByIdAndUpdate(request.params.id, person, {
-      new: true
-    })
+    new: true
+  })
     .then(updatedPerson => {
       response.json(updatedPerson.toJSON())
     })

@@ -10,7 +10,8 @@
     "build:ui": "rm -rf ./frontend-src/build && cd ./frontend-src && npm run build --prod",
     "deploy": "git push heroku master",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push && npm run deploy",
-    "logs:prod": "heroku logs --tail"
+    "logs:prod": "heroku logs --tail",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
   },
   "homepage": "https://github.com/oskarkunik/fullstackopen-part3#readme",
   "devDependencies": {
+    "eslint": "^6.5.1",
     "nodemon": "^1.19.2"
   },
   "dependencies": {
