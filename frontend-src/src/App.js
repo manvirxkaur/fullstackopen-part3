@@ -45,6 +45,9 @@ const App = () => {
         setPersons(persons.concat(addedPerson))
         resetForm()
       })
+      .catch(error => {
+        setNotification(error.response.data.error, 'error')
+      })
   }
 
   const updatePerson = (id, newPersonObject) => {
